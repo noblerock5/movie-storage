@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # 使用外部数据库和Redis，注释掉本地服务
+  # postgres:
+  #   image: postgres:15
+  #   environment:
+  #     POSTGRES_DB: moviedb
+  #     POSTGRES_USER: admin
+  #     POSTGRES_PASSWORD: admin123456
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - movie_network
+
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - movie_network
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://admin:admin123456@43.143.233.242:5432/moviedb
+      REDIS_URL: redis://:admin123456@3.143.233.242:6379
+    # 使用外部数据库和Redis，移除依赖
+    # depends_on:
+    #   - postgres
+    #   - redis
+    volumes:
+      - ./backend:/app
+      - ./uploads:/app/uploads
+    networks:
+      - movie_network
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - movie_network
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  movie_network:
+    driver: bridge
