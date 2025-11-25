@@ -33,58 +33,58 @@ const UploadContainer = styled.div`
 `;
 
 const UploadCard = styled(Card)`
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: white;
+  border: 1px solid #e0e0e0;
   
   .ant-card-head {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid #e0e0e0;
   }
   
   .ant-card-head-title {
-    color: white;
+    color: #333;
   }
   
   .ant-card-body {
-    background: transparent;
+    background: white;
   }
 `;
 
 const StyledDragger = styled(Dragger)`
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px dashed rgba(255, 255, 255, 0.3);
+  background: #f8f9fa;
+  border: 2px dashed #d0d0d0;
   border-radius: 12px;
   
   &:hover {
     border-color: #667eea;
-    background: rgba(102, 126, 234, 0.1);
+    background: rgba(102, 126, 234, 0.05);
   }
   
   .ant-upload-drag-icon {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(0, 0, 0, 0.4);
   }
   
   .ant-upload-text {
-    color: white;
+    color: #333;
   }
   
   .ant-upload-hint {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(0, 0, 0, 0.5);
   }
 `;
 
 const FormItem = styled(Form.Item)`
   .ant-form-item-label > label {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(0, 0, 0, 0.7);
   }
   
   .ant-input, .ant-input:focus, .ant-input-focused {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
+    background: white;
+    border: 1px solid #e0e0e0;
+    color: #333;
   }
   
   .ant-input::placeholder {
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(0, 0, 0, 0.4);
   }
   
   .ant-form-item-explain-error {
@@ -177,7 +177,7 @@ const UploadPage = () => {
 
   if (!user) {
     return (
-      <div style={{ textAlign: 'center', padding: '100px', color: 'white' }}>
+      <div style={{ textAlign: 'center', padding: '100px', color: '#333' }}>
         <Title level={3}>请先登录</Title>
         <Button type="primary" onClick={() => navigate('/login')}>
           去登录
@@ -252,7 +252,7 @@ const UploadPage = () => {
                   '100%': '#87d068',
                 }}
               />
-              <Text style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+              <Text style={{ color: 'rgba(0, 0, 0, 0.6)' }}>
                 正在上传，请勿关闭页面...
               </Text>
             </FormItem>
@@ -285,11 +285,11 @@ const UploadPage = () => {
         </Form>
       </UploadCard>
 
-      <div style={{ marginTop: '40px', padding: '20px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px' }}>
-        <Title level={4} style={{ color: 'white', marginBottom: '15px' }}>
+      <div style={{ marginTop: '40px', padding: '20px', background: '#f8f9fa', borderRadius: '8px' }}>
+        <Title level={4} style={{ color: '#333', marginBottom: '15px' }}>
           上传说明
         </Title>
-        <ul style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: '1.8' }}>
+        <ul style={{ color: 'rgba(0, 0, 0, 0.6)', lineHeight: '1.8' }}>
           <li>支持的视频格式：MP4、AVI、MKV、MOV、WMV、FLV</li>
           <li>文件大小限制：单个文件不超过 2GB</li>
           <li>上传完成后，电影将自动保存到您的个人库中</li>

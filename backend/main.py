@@ -15,7 +15,7 @@ from datetime import datetime
 
 from database import get_db, engine, Base
 from models import Movie, User, Favorite
-from schemas import MovieCreate, MovieResponse, UserCreate, FavoriteResponse
+from schemas import MovieCreate, MovieResponse, UserCreate, FavoriteResponse, LoginRequest
 from auth import get_current_user, create_access_token, verify_password, hash_password
 from search_service import MovieSearchService
 from cast_service import CastService
@@ -77,9 +77,9 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.post("/auth/login")
-async def login(email: str, password: str, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == email).first()
-    if not user or not verify_password(password, user.hashed_password):
+async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == login_data.email).first()
+    if not user or not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="邮箱或密码错误")
     
     access_token = create_access_token(data={"sub": user.email})

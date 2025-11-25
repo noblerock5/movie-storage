@@ -19,7 +19,7 @@ import {
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { TabPane } = Tabs;
 
 const LoginContainer = styled.div`
@@ -27,7 +27,7 @@ const LoginContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #a8dadc 0%, #457b9d 100%);
   padding: 20px;
 `;
 
