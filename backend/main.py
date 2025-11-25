@@ -111,7 +111,7 @@ async def search_movies(
             pass
     
     # 搜索电影
-    results = await search_service.search_movies(q, page)
+    results = await search_service.search_movies(q, page, db)
     
     # 缓存结果（如果Redis可用）
     if redis_client:

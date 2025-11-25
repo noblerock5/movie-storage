@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 from typing import List, Dict, Any
 import re
 from urllib.parse import urljoin, urlparse
+from sqlalchemy.orm import Session
+from models import Movie
 
 class MovieSearchService:
     def __init__(self):
@@ -12,9 +14,14 @@ class MovieSearchService:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
         
-    async def search_movies(self, query: str, page: int = 1) -> Dict[str, Any]:
+    async def search_movies(self, query: str, page: int = 1, db: Session = None) -> Dict[str, Any]:
         """搜索电影，整合多个数据源"""
         results = []
+        
+        # 搜索本地数据库
+        if db:
+            local_results = self._search_local_database(query, db)
+            results.extend(local_results)
         
         # 并行搜索多个数据源
         tasks = [
@@ -133,6 +140,37 @@ class MovieSearchService:
         if match:
             return int(match.group())
         return None
+    
+    def _search_local_database(self, query: str, db: Session) -> List[Dict]:
+        """搜索本地数据库"""
+        try:
+            # 搜索标题包含查询词的电影
+            movies = db.query(Movie).filter(
+                Movie.title.contains(query)
+            ).all()
+            
+            results = []
+            for movie in movies:
+                movie_dict = {
+                    "id": movie.id,
+                    "title": movie.title,
+                    "poster_url": movie.poster_url,
+                    "rating": movie.rating,
+                    "year": movie.year,
+                    "genre": movie.genre,
+                    "duration": movie.duration,
+                    "description": movie.description,
+                    "stream_url": movie.stream_url,
+                    "file_path": movie.file_path,
+                    "is_local": movie.is_local,
+                    "source": "local"
+                }
+                results.append(movie_dict)
+            
+            return results
+        except Exception as e:
+            print(f"本地数据库搜索错误: {e}")
+            return []
     
     def _deduplicate_results(self, results: List[Dict]) -> List[Dict]:
         """去重结果"""

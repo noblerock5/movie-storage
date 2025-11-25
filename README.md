@@ -151,6 +151,10 @@ movie-website/
 
 ## 开发指南
 
+## 默认管理员账户：
+邮箱: admin@movie.com
+密码: admin123
+
 ### 添加新的搜索源
 
 1. 在 `backend/search_service.py` 中添加新的搜索方法
