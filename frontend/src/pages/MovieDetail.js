@@ -18,7 +18,7 @@ import {
   PlayCircleOutlined, 
   HeartOutlined, 
   ShareAltOutlined,
-  TvOutlined,
+  VideoCameraOutlined,
   ArrowLeftOutlined
 } from '@ant-design/icons';
 import styled from 'styled-components';
@@ -362,7 +362,7 @@ const MovieDetail = () => {
             </Button>
             
             <Button
-              icon={<TvOutlined />}
+              icon={<VideoCameraOutlined />}
               onClick={handleCast}
             >
               投屏
@@ -409,7 +409,7 @@ const MovieDetail = () => {
               ]}
             >
               <List.Item.Meta
-                avatar={<Avatar icon={<TvOutlined />} />}
+                avatar={<Avatar icon={<VideoCameraOutlined />} />}
                 title={device.name}
                 description={`${device.type} - ${device.ip}`}
               />

@@ -14,7 +14,7 @@ import {
 } from 'antd';
 import { 
   UserOutlined, 
-  FilmOutlined, 
+  VideoCameraOutlined, 
   HeartOutlined, 
   UploadOutlined,
   LogoutOutlined,
@@ -204,7 +204,7 @@ const Profile = () => {
       case 'favorite':
         return <HeartOutlined style={{ color: '#ff4d4f' }} />;
       case 'watch':
-        return <FilmOutlined style={{ color: '#1890ff' }} />;
+        return <VideoCameraOutlined style={{ color: '#1890ff' }} />;
       default:
         return <UserOutlined />;
     }
@@ -286,7 +286,7 @@ const Profile = () => {
             <Statistic
               title="总观看次数"
               value={stats.totalViews}
-              prefix={<FilmOutlined />}
+              prefix={<VideoCameraOutlined />}
             />
           </StatCard>
         </Col>
@@ -295,7 +295,7 @@ const Profile = () => {
       <ActivityCard
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <FilmOutlined />
+            <VideoCameraOutlined />
             最近活动
           </div>
         }

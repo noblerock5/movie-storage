@@ -15,7 +15,7 @@ import {
 import { 
   InboxOutlined, 
   UploadOutlined,
-  FilmOutlined,
+  VideoCameraOutlined,
   ArrowLeftOutlined
 } from '@ant-design/icons';
 import styled from 'styled-components';
@@ -198,7 +198,7 @@ const UploadPage = () => {
 
       <UploadCard title={
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FilmOutlined />
+          <VideoCameraOutlined />
           上传电影
         </div>
       }>

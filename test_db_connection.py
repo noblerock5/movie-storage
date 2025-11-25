@@ -15,7 +15,7 @@ def test_postgresql():
         conn = psycopg2.connect(
             host='43.143.233.242',
             port=5432,
-            database='moviedb',
+            database='dbmovie',
             user='admin',
             password='admin123456'
         )
@@ -47,7 +47,7 @@ def test_redis():
     print("\n🔍 测试Redis连接...")
     try:
         r = redis.Redis(
-            host='3.143.233.242',
+            host='43.143.233.242',
             port=6379,
             password='admin123456',
             decode_responses=True

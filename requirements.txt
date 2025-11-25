@@ -6,8 +6,10 @@ psycopg2-binary==2.9.9
 redis==5.0.1
 pydantic==2.5.0
 pydantic-settings==2.1.0
+email-validator==2.1.0
 python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
+# passlib[bcrypt]==1.7.4  # 移除bcrypt依赖，使用自定义哈希
+# bcrypt>=4.0.0  # 移除bcrypt依赖
 python-multipart==0.0.6
 requests==2.31.0
 beautifulsoup4==4.12.2

@@ -63,13 +63,13 @@ pip install -r requirements.txt
 ```bash
 # 确保PostgreSQL和Redis正在运行
 # 创建数据库
-createdb moviedb
+createdb dbmovie
 ```
 
 3. 设置环境变量
 ```bash
-export DATABASE_URL="postgresql://admin:admin123456@43.143.233.242:5432/moviedb"
-export REDIS_URL="redis://:admin123456@3.143.233.242:6379"
+export DATABASE_URL="postgresql://admin:admin123456@43.143.233.242:5432/dbmovie"
+export REDIS_URL="redis://:admin123456@43.143.233.242:6379"
 ```
 
 4. 启动后端

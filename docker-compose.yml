@@ -5,7 +5,7 @@ services:
   # postgres:
   #   image: postgres:15
   #   environment:
-  #     POSTGRES_DB: moviedb
+  #     POSTGRES_DB: dbmovie
   #     POSTGRES_USER: admin
   #     POSTGRES_PASSWORD: admin123456
   #   ports:
@@ -29,8 +29,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://admin:admin123456@43.143.233.242:5432/moviedb
-      REDIS_URL: redis://:admin123456@3.143.233.242:6379
+      DATABASE_URL: postgresql://admin:admin123456@43.143.233.242:5432/dbmovie
+      REDIS_URL: redis://:admin123456@43.143.233.242:6379
     # 使用外部数据库和Redis，移除依赖
     # depends_on:
     #   - postgres

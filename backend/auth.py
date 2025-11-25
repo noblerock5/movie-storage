@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import hashlib
+import secrets
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
@@ -12,16 +13,24 @@ SECRET_KEY = "your-secret-key-here"  # 在生产环境中使用环境变量
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
 def hash_password(password: str) -> str:
-    """生成密码哈希"""
-    return pwd_context.hash(password)
+    """生成密码哈希 - 使用 SHA-256 + salt"""
+    salt = secrets.token_hex(16)
+    password_hash = hashlib.sha256((password + salt).encode()).hexdigest()
+    return f"sha256${salt}${password_hash}"
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """验证密码"""
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        algorithm, salt, stored_hash = hashed_password.split('$')
+        if algorithm != 'sha256':
+            return False
+        password_hash = hashlib.sha256((plain_password + salt).encode()).hexdigest()
+        return password_hash == stored_hash
+    except:
+        return False
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()

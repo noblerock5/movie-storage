@@ -24,7 +24,7 @@ pip install psycopg2-binary redis > /dev/null 2>&1
 python3 -c \"
 import psycopg2
 try:
-    conn = psycopg2.connect('postgresql://admin:admin123456@43.143.233.242:5432/moviedb')
+    conn = psycopg2.connect('postgresql://admin:admin123456@43.143.233.242:5432/dbmovie')
     print('✅ PostgreSQL连接成功')
     conn.close()
 except Exception as e:
@@ -33,7 +33,7 @@ except Exception as e:
 
 import redis
 try:
-    r = redis.Redis(host='3.143.233.242', port=6379, password='admin123456', decode_responses=True)
+    r = redis.Redis(host='43.143.233.242', port=6379, password='admin123456', decode_responses=True)
     r.ping()
     print('✅ Redis连接成功')
 except Exception as e:

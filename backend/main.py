@@ -39,8 +39,15 @@ os.makedirs("static", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Redis连接
-redis_client = redis.Redis(host='3.143.233.242', port=6379, password='admin123456', db=0, decode_responses=True)
+# Redis连接（可选）
+try:
+    redis_client = redis.Redis(host='43.143.233.242', port=6379, password='admin123456', db=0, decode_responses=True, socket_connect_timeout=2)
+    # 测试连接
+    redis_client.ping()
+    print("Redis连接成功")
+except Exception as e:
+    print(f"Redis连接失败，将禁用缓存功能: {e}")
+    redis_client = None
 
 # 服务实例
 search_service = MovieSearchService()
@@ -93,18 +100,25 @@ async def search_movies(
     page: int = Query(1, ge=1, description="页码"),
     db: Session = Depends(get_db)
 ):
-    # 先从缓存查找
+    # 先从缓存查找（如果Redis可用）
     cache_key = f"search:{q}:{page}"
-    cached_result = redis_client.get(cache_key)
-    
-    if cached_result:
-        return json.loads(cached_result)
+    if redis_client:
+        try:
+            cached_result = redis_client.get(cache_key)
+            if cached_result:
+                return json.loads(cached_result)
+        except Exception:
+            pass
     
     # 搜索电影
     results = await search_service.search_movies(q, page)
     
-    # 缓存结果
-    redis_client.setex(cache_key, 3600, json.dumps(results))
+    # 缓存结果（如果Redis可用）
+    if redis_client:
+        try:
+            redis_client.setex(cache_key, 3600, json.dumps(results))
+        except Exception:
+            pass
     
     return results
 
