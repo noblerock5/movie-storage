@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Card, 
@@ -7,7 +7,6 @@ import {
   Col, 
   Statistic, 
   Button, 
-  Avatar,
   List,
   Tag,
   message
@@ -33,7 +32,7 @@ const ProfileContainer = styled.div`
 `;
 
 const ProfileHeader = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #a8dadc 0%, #457b9d 100%);
   border-radius: 16px;
   padding: 40px;
   margin-bottom: 40px;
@@ -54,7 +53,7 @@ const ProfileHeader = styled.div`
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -79,52 +78,52 @@ const ProfileHeader = styled.div`
 `;
 
 const StatCard = styled(Card)`
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: white;
+  border: 1px solid #e0e0e0;
   text-align: center;
   
   .ant-card-body {
-    background: transparent;
-    color: white;
+    background: white;
+    color: #333;
   }
   
   .ant-statistic-title {
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: rgba(0, 0, 0, 0.6) !important;
   }
   
   .ant-statistic-content {
-    color: white !important;
+    color: #333 !important;
   }
 `;
 
 const ActivityCard = styled(Card)`
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: white;
+  border: 1px solid #e0e0e0;
   margin-top: 20px;
   
   .ant-card-head {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid #e0e0e0;
   }
   
   .ant-card-head-title {
-    color: white;
+    color: #333;
   }
   
   .ant-card-body {
-    background: transparent;
+    background: white;
   }
   
   .ant-list-item {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    color: white;
+    border-bottom: 1px solid #e0e0e0;
+    color: #333;
   }
   
   .ant-list-item-meta-title {
-    color: white !important;
+    color: #333 !important;
   }
   
   .ant-list-item-meta-description {
-    color: rgba(255, 255, 255, 0.6) !important;
+    color: rgba(0, 0, 0, 0.6) !important;
   }
 `;
 
@@ -137,23 +136,16 @@ const Profile = () => {
     totalViews: 0
   });
   const [recentActivity, setRecentActivity] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      fetchProfileData();
-    }
-  }, [user]);
-
-  const fetchProfileData = async () => {
+  const fetchProfileData = useCallback(async () => {
     try {
       // 获取用户统计信息
       const [favoritesResponse, moviesResponse] = await Promise.all([
-        api.get('/api/favorites'),
-        api.get('/api/movies?page=1&limit=100')
+        api.get('/api/v1/favorites'),
+        api.get('/api/v1/movies?page=1&limit=100')
       ]);
 
-      const favoriteCount = favoritesResponse.data.movies?.length || 0;
+      const favoriteCount = favoritesResponse.data?.length || 0;
       const uploadedCount = moviesResponse.data.movies?.filter(m => m.user_id === user.id).length || 0;
 
       setStats({
@@ -187,10 +179,14 @@ const Profile = () => {
     } catch (error) {
       console.error('获取用户数据失败:', error);
       message.error('获取用户数据失败');
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchProfileData();
+    }
+  }, [user, fetchProfileData]);
 
   const handleLogout = () => {
     logout();

@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  Card, 
   Typography, 
   Button, 
-  Row, 
-  Col, 
   Tag, 
   Rate, 
   Spin, 
@@ -61,23 +58,23 @@ const MoviePoster = styled.div`
   .placeholder {
     width: 100%;
     height: 100%;
-    background: linear-gradient(45deg, #333, #666);
+    background: linear-gradient(45deg, #e0e0e0, #f0f0f0);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: #666;
     font-size: 18px;
   }
 `;
 
 const MovieInfo = styled.div`
   flex: 1;
-  color: white;
+  color: #333;
   
   .title {
     font-size: 32px;
     font-weight: bold;
-    color: white;
+    color: #333;
     margin-bottom: 20px;
   }
   
@@ -91,12 +88,12 @@ const MovieInfo = styled.div`
       display: flex;
       align-items: center;
       gap: 5px;
-      color: rgba(255, 255, 255, 0.8);
+      color: rgba(0, 0, 0, 0.7);
     }
   }
   
   .description {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(0, 0, 0, 0.6);
     line-height: 1.8;
     margin-bottom: 30px;
     font-size: 16px;
@@ -130,17 +127,17 @@ const VideoContainer = styled.div`
 
 const CastModal = styled(Modal)`
   .ant-modal-content {
-    background: #1a1a1a;
-    color: white;
+    background: white;
+    color: #333;
   }
   
   .ant-modal-header {
-    background: #1a1a1a;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
   }
   
   .ant-modal-title {
-    color: white;
+    color: #333;
   }
 `;
 
@@ -155,13 +152,19 @@ const MovieDetail = () => {
   const [castDevices, setCastDevices] = useState([]);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  useEffect(() => {
-    fetchMovieDetail();
+  const checkFavoriteStatus = useCallback(async () => {
+    try {
+      const response = await api.get('/api/v1/favorites');
+      const favorites = response.data || [];
+      setIsFavorite(favorites.some(m => m.id === parseInt(id)));
+    } catch (error) {
+      console.error('检查收藏状态失败:', error);
+    }
   }, [id]);
 
-  const fetchMovieDetail = async () => {
+  const fetchMovieDetail = useCallback(async () => {
     try {
-      const response = await api.get(`/api/movies/${id}`);
+      const response = await api.get(`/api/v1/movies/${id}`);
       setMovie(response.data);
       
       // 检查是否已收藏
@@ -174,17 +177,11 @@ const MovieDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, user, checkFavoriteStatus]);
 
-  const checkFavoriteStatus = async () => {
-    try {
-      const response = await api.get('/api/favorites');
-      const favorites = response.data.movies || [];
-      setIsFavorite(favorites.some(m => m.id === parseInt(id)));
-    } catch (error) {
-      console.error('检查收藏状态失败:', error);
-    }
-  };
+  useEffect(() => {
+    fetchMovieDetail();
+  }, [fetchMovieDetail]);
 
   const handlePlay = () => {
     setPlaying(true);
@@ -199,10 +196,10 @@ const MovieDetail = () => {
 
     try {
       if (isFavorite) {
-        await api.delete(`/api/favorites/${id}`);
+        await api.delete(`/api/v1/favorites/${id}`);
         message.success('已取消收藏');
       } else {
-        await api.post(`/api/favorites/${id}`);
+        await api.post(`/api/v1/favorites/${id}`);
         message.success('收藏成功');
       }
       setIsFavorite(!isFavorite);
@@ -219,7 +216,7 @@ const MovieDetail = () => {
 
   const handleCast = async () => {
     try {
-      const response = await api.get(`/api/cast/${id}`);
+      const response = await api.get(`/api/v1/cast/${id}`);
       setCastDevices(response.data.available_devices || []);
       setCastModalVisible(true);
     } catch (error) {
@@ -229,7 +226,7 @@ const MovieDetail = () => {
 
   const startCast = async (device) => {
     try {
-      const response = await api.post('/api/cast/start', {
+      const response = await api.post('/api/v1/cast/start', {
         movie_id: parseInt(id),
         device_ip: device.ip
       });

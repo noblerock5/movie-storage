@@ -76,9 +76,9 @@ const Header = () => {
         left: 0,
         right: 0,
         zIndex: 1000,
-        background: 'rgba(0, 0, 0, 0.95)',
+        background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
         padding: '0 20px',
         display: 'flex',
         alignItems: 'center',
@@ -89,7 +89,7 @@ const Header = () => {
         <Link
           to="/"
           style={{
-            color: '#fff',
+            color: '#333',
             fontSize: '20px',
             fontWeight: 'bold',
             marginRight: '40px',
@@ -102,7 +102,7 @@ const Header = () => {
         </Link>
         
         <Menu
-          theme="dark"
+          theme="light"
           mode="horizontal"
           selectedKeys={[location.pathname]}
           items={menuItems}
@@ -131,7 +131,7 @@ const Header = () => {
             placement="bottomRight"
             arrow
           >
-            <Space style={{ cursor: 'pointer', color: '#fff' }}>
+            <Space style={{ cursor: 'pointer', color: '#333' }}>
               <Avatar size="small" icon={<UserOutlined />} />
               <span>{user.username}</span>
             </Space>

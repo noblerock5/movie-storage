@@ -22,7 +22,7 @@ import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const Container = styled.div`
   max-width: 1200px;
@@ -31,16 +31,16 @@ const Container = styled.div`
 `;
 
 const MovieCard = styled(Card)`
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: white;
+  border: 1px solid #e0e0e0;
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s ease;
   
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-    border-color: rgba(102, 126, 234, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-color: #667eea;
   }
   
   .ant-card-cover img {
@@ -49,18 +49,18 @@ const MovieCard = styled(Card)`
   }
   
   .ant-card-body {
-    background: transparent;
-    color: white;
+    background: white;
+    color: #333;
   }
   
   .ant-card-meta-title {
-    color: white !important;
+    color: #333 !important;
     font-size: 16px;
     font-weight: 600;
   }
   
   .ant-card-meta-description {
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: rgba(0, 0, 0, 0.6) !important;
   }
 `;
 
@@ -71,7 +71,7 @@ const Header = styled.div`
   margin-bottom: 40px;
   
   .title {
-    color: white;
+    color: #333;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -92,8 +92,8 @@ const Favorites = () => {
 
   const fetchFavorites = async () => {
     try {
-      const response = await api.get('/api/favorites');
-      setFavorites(response.data.movies || []);
+      const response = await api.get('/api/v1/favorites');
+      setFavorites(response.data || []);
     } catch (error) {
       console.error('获取收藏列表失败:', error);
       message.error('获取收藏列表失败');
@@ -104,7 +104,7 @@ const Favorites = () => {
 
   const removeFavorite = async (movieId) => {
     try {
-      await api.delete(`/api/favorites/${movieId}`);
+      await api.delete(`/api/v1/favorites/${movieId}`);
       message.success('已取消收藏');
       setFavorites(favorites.filter(movie => movie.id !== movieId));
     } catch (error) {
@@ -151,11 +151,11 @@ const Favorites = () => {
                   ) : (
                     <div style={{ 
                       height: '300px', 
-                      background: 'linear-gradient(45deg, #333, #666)',
+                      background: 'linear-gradient(45deg, #e0e0e0, #f0f0f0)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: 'white',
+                      color: '#666',
                       fontSize: '18px'
                     }}>
                       暂无海报
@@ -168,7 +168,7 @@ const Favorites = () => {
                       type="text"
                       icon={<PlayCircleOutlined />}
                       onClick={() => window.open(getStreamingUrl(movie), '_blank')}
-                      style={{ color: 'white' }}
+                      style={{ color: '#333' }}
                     >
                       播放
                     </Button>
@@ -176,7 +176,7 @@ const Favorites = () => {
                   <Link to={`/movie/${movie.id}`}>
                     <Button
                       type="text"
-                      style={{ color: 'white' }}
+                      style={{ color: '#333' }}
                     >
                       详情
                     </Button>
@@ -224,7 +224,7 @@ const Favorites = () => {
         <Empty
           description="还没有收藏任何电影"
           style={{ 
-            color: 'rgba(255, 255, 255, 0.5)',
+            color: 'rgba(0, 0, 0, 0.5)',
             padding: '60px 0'
           }}
         >

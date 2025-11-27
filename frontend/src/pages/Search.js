@@ -2,19 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
   Input, 
-  Row, 
-  Col, 
   Card, 
   Typography, 
   Button, 
   Spin, 
   Empty, 
   Pagination,
-  Tag,
-  Rate
+  Tag
 } from 'antd';
 import { SearchOutlined, PlayCircleOutlined, StarOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import api from '../services/api';
 
@@ -28,8 +24,8 @@ const SearchContainer = styled.div`
 `;
 
 const MovieCard = styled(Card)`
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: white;
+  border: 1px solid #e0e0e0;
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -37,13 +33,13 @@ const MovieCard = styled(Card)`
   
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-    border-color: rgba(102, 126, 234, 0.5);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: #667eea;
   }
   
   .ant-card-body {
-    background: transparent;
-    color: white;
+    background: white;
+    color: #333;
   }
 `;
 
@@ -63,11 +59,11 @@ const MoviePoster = styled.div`
   .placeholder {
     width: 100%;
     height: 100%;
-    background: linear-gradient(45deg, #333, #666);
+    background: linear-gradient(45deg, #e0e0e0, #f0f0f0);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: #666;
     font-size: 14px;
   }
 `;
@@ -75,12 +71,12 @@ const MoviePoster = styled.div`
 const MovieInfo = styled.div`
   flex: 1;
   padding-left: 20px;
-  color: white;
+  color: #333;
   
   .title {
     font-size: 18px;
     font-weight: 600;
-    color: white;
+    color: #333;
     margin-bottom: 8px;
     display: flex;
     align-items: center;
@@ -92,12 +88,12 @@ const MovieInfo = styled.div`
     align-items: center;
     gap: 15px;
     margin-bottom: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(0, 0, 0, 0.6);
     font-size: 14px;
   }
   
   .description {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(0, 0, 0, 0.5);
     line-height: 1.5;
     margin-bottom: 15px;
     display: -webkit-box;
@@ -126,18 +122,18 @@ const SearchPage = () => {
       setQuery(initialQuery);
       performSearch(initialQuery, 1);
     }
-  }, []);
+  }, [searchParams]);
 
   const performSearch = async (searchQuery, page = 1) => {
     if (!searchQuery.trim()) return;
 
     setLoading(true);
     try {
-      const response = await api.get('/api/movies/search', {
+      const response = await api.get('/api/v1/movies/search', {
         params: { q: searchQuery, page }
       });
       
-      setSearchResults(response.data.results || []);
+      setSearchResults(response.data.movies || []);
       setTotalResults(response.data.total || 0);
       setCurrentPage(page);
     } catch (error) {
@@ -169,7 +165,7 @@ const SearchPage = () => {
   return (
     <div>
       <SearchContainer>
-        <Title level={2} style={{ color: 'white', textAlign: 'center', marginBottom: '30px' }}>
+        <Title level={2} style={{ color: '#333', textAlign: 'center', marginBottom: '30px' }}>
           搜索电影
         </Title>
         
@@ -192,7 +188,7 @@ const SearchPage = () => {
           </div>
         ) : searchResults.length > 0 ? (
           <>
-            <div style={{ marginBottom: '20px', color: 'rgba(255, 255, 255, 0.7)' }}>
+            <div style={{ marginBottom: '20px', color: 'rgba(0, 0, 0, 0.6)' }}>
               找到 {totalResults} 个结果
             </div>
             
@@ -275,10 +271,10 @@ const SearchPage = () => {
         ) : query ? (
           <Empty
             description="没有找到相关电影"
-            style={{ color: 'rgba(255, 255, 255, 0.5)' }}
+            style={{ color: 'rgba(0, 0, 0, 0.5)' }}
           />
         ) : (
-          <div style={{ textAlign: 'center', padding: '50px', color: 'rgba(255, 255, 255, 0.5)' }}>
+          <div style={{ textAlign: 'center', padding: '50px', color: 'rgba(0, 0, 0, 0.5)' }}>
             <Title level={4} style={{ color: 'inherit' }}>
               开始搜索您喜欢的电影
             </Title>
