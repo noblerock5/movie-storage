@@ -1,420 +1,286 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  Typography, 
-  Button, 
-  Tag, 
-  Rate, 
-  Spin, 
-  message,
-  Modal,
-  List,
-  Avatar
-} from 'antd';
-import { 
-  PlayCircleOutlined, 
-  HeartOutlined, 
-  ShareAltOutlined,
-  VideoCameraOutlined,
-  ArrowLeftOutlined
-} from '@ant-design/icons';
-import styled from 'styled-components';
-import ReactPlayer from 'react-player';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
-
-const { Title, Paragraph, Text } = Typography;
-
-const DetailContainer = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-`;
-
-const MovieHeader = styled.div`
-  display: flex;
-  gap: 30px;
-  margin-bottom: 40px;
-  
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: center;
-  }
-`;
-
-const MoviePoster = styled.div`
-  width: 300px;
-  height: 450px;
-  border-radius: 12px;
-  overflow: hidden;
-  flex-shrink: 0;
-  
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .placeholder {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, #e0e0e0, #f0f0f0);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #666;
-    font-size: 18px;
-  }
-`;
-
-const MovieInfo = styled.div`
-  flex: 1;
-  color: #333;
-  
-  .title {
-    font-size: 32px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 20px;
-  }
-  
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 20px;
-    
-    .meta-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      color: rgba(0, 0, 0, 0.7);
-    }
-  }
-  
-  .description {
-    color: rgba(0, 0, 0, 0.6);
-    line-height: 1.8;
-    margin-bottom: 30px;
-    font-size: 16px;
-  }
-  
-  .actions {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-  }
-`;
-
-const VideoContainer = styled.div`
-  margin-top: 40px;
-  
-  .video-wrapper {
-    position: relative;
-    padding-bottom: 56.25%;
-    height: 0;
-    overflow: hidden;
-    background: #000;
-    border-radius: 12px;
-  }
-  
-  .react-player {
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-`;
-
-const CastModal = styled(Modal)`
-  .ant-modal-content {
-    background: white;
-    color: #333;
-  }
-  
-  .ant-modal-header {
-    background: white;
-    border-bottom: 1px solid #e0e0e0;
-  }
-  
-  .ant-modal-title {
-    color: #333;
-  }
-`;
 
 const MovieDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [playing, setPlaying] = useState(false);
-  const [castModalVisible, setCastModalVisible] = useState(false);
-  const [castDevices, setCastDevices] = useState([]);
   const [isFavorite, setIsFavorite] = useState(false);
-
-  const checkFavoriteStatus = useCallback(async () => {
-    try {
-      const response = await api.get('/api/v1/favorites');
-      const favorites = response.data || [];
-      setIsFavorite(favorites.some(m => m.id === parseInt(id)));
-    } catch (error) {
-      console.error('检查收藏状态失败:', error);
-    }
-  }, [id]);
-
-  const fetchMovieDetail = useCallback(async () => {
-    try {
-      const response = await api.get(`/api/v1/movies/${id}`);
-      setMovie(response.data);
-      
-      // 检查是否已收藏
-      if (user) {
-        checkFavoriteStatus();
-      }
-    } catch (error) {
-      console.error('获取电影详情失败:', error);
-      message.error('获取电影详情失败');
-    } finally {
-      setLoading(false);
-    }
-  }, [id, user, checkFavoriteStatus]);
+  const [showPlayer, setShowPlayer] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
 
   useEffect(() => {
+    const fetchMovieDetail = async () => {
+      try {
+        const response = await api.get(`/api/v1/movies/${id}`);
+        setMovie(response.data);
+      } catch (error) {
+        console.error('获取电影详情失败:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const checkFavoriteStatus = async () => {
+      try {
+        const response = await api.get(`/api/v1/favorites/check/${id}`);
+        setIsFavorite(response.data.is_favorite);
+      } catch (error) {
+        console.error('检查收藏状态失败:', error);
+      }
+    };
+
     fetchMovieDetail();
-  }, [fetchMovieDetail]);
+    if (user) {
+      checkFavoriteStatus();
+    }
+  }, [id, user]);
 
-  const handlePlay = () => {
-    setPlaying(true);
-  };
 
-  const handleFavorite = async () => {
+
+  const toggleFavorite = async () => {
     if (!user) {
-      message.warning('请先登录');
       navigate('/login');
       return;
     }
 
+    setFavoriteLoading(true);
     try {
       if (isFavorite) {
         await api.delete(`/api/v1/favorites/${id}`);
-        message.success('已取消收藏');
+        setIsFavorite(false);
       } else {
         await api.post(`/api/v1/favorites/${id}`);
-        message.success('收藏成功');
+        setIsFavorite(true);
       }
-      setIsFavorite(!isFavorite);
     } catch (error) {
-      message.error('操作失败');
+      console.error('操作收藏失败:', error);
+    } finally {
+      setFavoriteLoading(false);
     }
   };
 
-  const handleShare = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
-    message.success('链接已复制到剪贴板');
-  };
-
-  const handleCast = async () => {
-    try {
-      const response = await api.get(`/api/v1/cast/${id}`);
-      setCastDevices(response.data.available_devices || []);
-      setCastModalVisible(true);
-    } catch (error) {
-      message.error('获取投屏设备失败');
-    }
-  };
-
-  const startCast = async (device) => {
-    try {
-      const response = await api.post('/api/v1/cast/start', {
-        movie_id: parseInt(id),
-        device_ip: device.ip
+  const shareMovie = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: movie.title,
+        text: movie.description,
+        url: window.location.href
       });
-      
-      if (response.data.success) {
-        message.success(`已开始投屏到 ${device.name}`);
-        setCastModalVisible(false);
-      } else {
-        message.error(response.data.message || '投屏失败');
-      }
-    } catch (error) {
-      message.error('投屏失败');
+    } else {
+      // 复制链接到剪贴板
+      navigator.clipboard.writeText(window.location.href);
+      alert('链接已复制到剪贴板');
     }
-  };
-
-  const getStreamingUrl = () => {
-    if (!movie) return null;
-    
-    if (movie.stream_url) return movie.stream_url;
-    if (movie.file_path) return `http://localhost:8000/${movie.file_path}`;
-    return null;
   };
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '100px' }}>
-        <Spin size="large" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="loading-spinner mx-auto mb-4"></div>
+          <p className="text-white text-lg">加载电影详情中...</p>
+        </div>
       </div>
     );
   }
 
   if (!movie) {
     return (
-      <div style={{ textAlign: 'center', padding: '100px', color: 'white' }}>
-        <Title level={3}>电影不存在</Title>
-        <Button type="primary" onClick={() => navigate('/')}>
-          返回首页
-        </Button>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">😔</div>
+          <p className="text-white text-lg mb-4">电影不存在</p>
+          <button 
+            onClick={() => navigate('/')}
+            className="btn-primary"
+          >
+            返回首页
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <DetailContainer>
-      <Button
-        icon={<ArrowLeftOutlined />}
-        onClick={() => navigate(-1)}
-        style={{ marginBottom: '20px' }}
-      >
-        返回
-      </Button>
+    <div className="page-container min-h-screen">
+      {/* 返回按钮 */}
+      <div className="pt-20 px-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-6 flex items-center space-x-2 text-white/80 hover:text-white transition-colors duration-200"
+        >
+          <span>←</span>
+          <span>返回</span>
+        </button>
+      </div>
 
-      <MovieHeader>
-        <MoviePoster>
-          {movie.poster_url ? (
-            <img alt={movie.title} src={movie.poster_url} />
-          ) : (
-            <div className="placeholder">暂无海报</div>
-          )}
-        </MoviePoster>
+      {/* 电影详情头部 */}
+      <div className="content-wrapper pb-12">
+        <div className="glass-card p-8 mb-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* 电影海报 */}
+            <div className="flex-shrink-0">
+              <div className="relative w-72 h-96 lg:w-80 lg:h-120 mx-auto lg:mx-0">
+                {movie.poster_url ? (
+                  <img 
+                    src={movie.poster_url} 
+                    alt={movie.title}
+                    className="w-full h-full object-cover rounded-2xl shadow-2xl"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 rounded-2xl flex items-center justify-center">
+                    <div className="text-white text-center">
 
-        <MovieInfo>
-          <Title className="title">{movie.title}</Title>
-          
-          <div className="meta">
-            {movie.year && (
-              <div className="meta-item">
-                <span>年份:</span>
-                <Text strong>{movie.year}</Text>
+                      <div className="text-lg">暂无海报</div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* 播放按钮悬浮层 */}
+                <div className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <button
+                    onClick={() => setShowPlayer(true)}
+                    className="bg-white/90 backdrop-blur-sm rounded-full p-6 transform hover:scale-110 transition-transform duration-300"
+                  >
+                    <div className="text-3xl">▶️</div>
+                  </button>
+                </div>
               </div>
-            )}
-            
-            {movie.genre && (
-              <div className="meta-item">
-                <span>类型:</span>
-                <Tag color="blue">{movie.genre}</Tag>
+            </div>
+
+            {/* 电影信息 */}
+            <div className="flex-1 text-white">
+              <h1 className="text-4xl lg:text-5xl font-bold mb-4">
+                {movie.title}
+              </h1>
+
+              {/* 电影元信息 */}
+              <div className="flex flex-wrap items-center gap-4 mb-6">
+                {movie.year && (
+                  <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
+                    📅 {movie.year}年
+                  </span>
+                )}
+                {movie.genre && (
+                  <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
+                    🎭 {movie.genre}
+                  </span>
+                )}
+                {movie.duration && (
+                  <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
+                    ⏱️ {movie.duration}分钟
+                  </span>
+                )}
+                {movie.rating && (
+                  <span className="bg-yellow-500/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm flex items-center space-x-1">
+                    <span>★</span>
+                    <span>{movie.rating}</span>
+                  </span>
+                )}
+                {movie.is_local && (
+                  <span className="bg-green-500/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
+                    本地文件
+                  </span>
+                )}
               </div>
-            )}
-            
-            {movie.duration && (
-              <div className="meta-item">
-                <span>时长:</span>
-                <Text strong>{movie.duration}分钟</Text>
-              </div>
-            )}
-            
-            {movie.rating && (
-              <div className="meta-item">
-                <Rate disabled value={movie.rating / 2} style={{ fontSize: '16px' }} />
-                <Text strong>{movie.rating}</Text>
-              </div>
-            )}
-            
-            {movie.is_local && (
-              <Tag color="green">本地上传</Tag>
-            )}
-          </div>
 
-          {movie.description && (
-            <Paragraph className="description">
-              {movie.description}
-            </Paragraph>
-          )}
+              {/* 电影描述 */}
+              {movie.description && (
+                <div className="mb-8">
+                  <h3 className="text-xl font-semibold mb-3">剧情简介</h3>
+                  <p className="text-white/80 leading-relaxed">
+                    {movie.description}
+                  </p>
+                </div>
+              )}
 
-          <div className="actions">
-            {getStreamingUrl() && (
-              <Button
-                type="primary"
-                size="large"
-                icon={<PlayCircleOutlined />}
-                onClick={handlePlay}
-              >
-                立即播放
-              </Button>
-            )}
-            
-            <Button
-              icon={<HeartOutlined />}
-              onClick={handleFavorite}
-              type={isFavorite ? 'primary' : 'default'}
-            >
-              {isFavorite ? '已收藏' : '收藏'}
-            </Button>
-            
-            <Button
-              icon={<ShareAltOutlined />}
-              onClick={handleShare}
-            >
-              分享
-            </Button>
-            
-            <Button
-              icon={<VideoCameraOutlined />}
-              onClick={handleCast}
-            >
-              投屏
-            </Button>
-          </div>
-        </MovieInfo>
-      </MovieHeader>
-
-      {playing && getStreamingUrl() && (
-        <VideoContainer>
-          <Title level={3} style={{ color: 'white', marginBottom: '20px' }}>
-            在线播放
-          </Title>
-          <div className="video-wrapper">
-            <ReactPlayer
-              className="react-player"
-              url={getStreamingUrl()}
-              width="100%"
-              height="100%"
-              controls
-              playing
-            />
-          </div>
-        </VideoContainer>
-      )}
-
-      <CastModal
-        title="选择投屏设备"
-        open={castModalVisible}
-        onCancel={() => setCastModalVisible(false)}
-        footer={null}
-      >
-        <List
-          dataSource={castDevices}
-          renderItem={(device) => (
-            <List.Item
-              actions={[
-                <Button
-                  type="primary"
-                  onClick={() => startCast(device)}
+              {/* 操作按钮 */}
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={() => setShowPlayer(true)}
+                  className="btn-primary flex items-center space-x-2"
                 >
-                  投屏
-                </Button>
-              ]}
-            >
-              <List.Item.Meta
-                avatar={<Avatar icon={<VideoCameraOutlined />} />}
-                title={device.name}
-                description={`${device.type} - ${device.ip}`}
-              />
-            </List.Item>
-          )}
-        />
-      </CastModal>
-    </DetailContainer>
+                  <span>▶️</span>
+                  <span>立即播放</span>
+                </button>
+
+                <button
+                  onClick={toggleFavorite}
+                  disabled={favoriteLoading}
+                  className={`flex items-center space-x-2 px-6 py-3 rounded-full font-semibold transition-all duration-200 ${
+                    isFavorite
+                      ? 'bg-red-500 text-white hover:bg-red-600'
+                      : 'bg-white/20 backdrop-blur-sm text-white hover:bg-white/30'
+                  }`}
+                >
+                  <span>{isFavorite ? '♥' : '♡'}</span>
+                  <span>{isFavorite ? '已收藏' : '收藏'}</span>
+                </button>
+
+                <button
+                  onClick={shareMovie}
+                  className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-full font-semibold hover:bg-white/30 transition-all duration-200"
+                >
+                  分享
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 播放器模态框 */}
+        {showPlayer && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <div className="relative w-full max-w-4xl">
+              <button
+                onClick={() => setShowPlayer(false)}
+                className="absolute -top-12 right-0 text-white hover:text-white/80 transition-colors duration-200"
+              >
+                ✕ 关闭
+              </button>
+              
+              {movie.stream_url || movie.file_path ? (
+                <div className="relative w-full pt-[56.25%] bg-black rounded-lg overflow-hidden">
+                  <video
+                    className="absolute inset-0 w-full h-full"
+                    controls
+                    autoPlay
+                    src={movie.stream_url || movie.file_path}
+                  >
+                    您的浏览器不支持视频播放
+                  </video>
+                </div>
+              ) : (
+                <div className="bg-white rounded-lg p-8 text-center">
+
+                  <p className="text-gray-700 text-lg mb-4">暂无播放源</p>
+                  <p className="text-gray-500">这部电影暂时无法在线播放</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 相关推荐 */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold text-white mb-6">
+            相关推荐
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {/* 这里可以添加相关电影的推荐逻辑 */}
+            <div className="text-center text-white/60 py-8 col-span-full">
+              暂无相关推荐
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -1,331 +1,249 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  Card, 
-  Typography, 
-  Row, 
-  Col, 
-  Statistic, 
-  Button, 
-  List,
-  Tag,
-  message
-} from 'antd';
-import { 
-  UserOutlined, 
-  VideoCameraOutlined, 
-  HeartOutlined, 
-  UploadOutlined,
-  LogoutOutlined,
-  EditOutlined
-} from '@ant-design/icons';
-import styled from 'styled-components';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import api from '../services/api';
-
-const { Title, Text } = Typography;
-
-const ProfileContainer = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
-`;
-
-const ProfileHeader = styled.div`
-  background: linear-gradient(135deg, #a8dadc 0%, #457b9d 100%);
-  border-radius: 16px;
-  padding: 40px;
-  margin-bottom: 40px;
-  color: white;
-  
-  .user-info {
-    display: flex;
-    align-items: center;
-    gap: 30px;
-    
-    @media (max-width: 768px) {
-      flex-direction: column;
-      text-align: center;
-    }
-  }
-  
-  .avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 48px;
-  }
-  
-  .details h2 {
-    margin: 0 0 10px 0;
-    font-size: 28px;
-  }
-  
-  .details p {
-    margin: 5px 0;
-    opacity: 0.9;
-  }
-  
-  .actions {
-    margin-top: 20px;
-    display: flex;
-    gap: 15px;
-  }
-`;
-
-const StatCard = styled(Card)`
-  background: white;
-  border: 1px solid #e0e0e0;
-  text-align: center;
-  
-  .ant-card-body {
-    background: white;
-    color: #333;
-  }
-  
-  .ant-statistic-title {
-    color: rgba(0, 0, 0, 0.6) !important;
-  }
-  
-  .ant-statistic-content {
-    color: #333 !important;
-  }
-`;
-
-const ActivityCard = styled(Card)`
-  background: white;
-  border: 1px solid #e0e0e0;
-  margin-top: 20px;
-  
-  .ant-card-head {
-    border-bottom: 1px solid #e0e0e0;
-  }
-  
-  .ant-card-head-title {
-    color: #333;
-  }
-  
-  .ant-card-body {
-    background: white;
-  }
-  
-  .ant-list-item {
-    border-bottom: 1px solid #e0e0e0;
-    color: #333;
-  }
-  
-  .ant-list-item-meta-title {
-    color: #333 !important;
-  }
-  
-  .ant-list-item-meta-description {
-    color: rgba(0, 0, 0, 0.6) !important;
-  }
-`;
 
 const Profile = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [stats, setStats] = useState({
-    uploadedMovies: 0,
-    favoriteMovies: 0,
-    totalViews: 0
-  });
-  const [recentActivity, setRecentActivity] = useState([]);
-
-  const fetchProfileData = useCallback(async () => {
-    try {
-      // 获取用户统计信息
-      const [favoritesResponse, moviesResponse] = await Promise.all([
-        api.get('/api/v1/favorites'),
-        api.get('/api/v1/movies?page=1&limit=100')
-      ]);
-
-      const favoriteCount = favoritesResponse.data?.length || 0;
-      const uploadedCount = moviesResponse.data.movies?.filter(m => m.user_id === user.id).length || 0;
-
-      setStats({
-        uploadedMovies: uploadedCount,
-        favoriteMovies: favoriteCount,
-        totalViews: uploadedCount * 10 // 模拟观看次数
-      });
-
-      // 模拟最近活动
-      setRecentActivity([
-        {
-          title: '上传了电影',
-          description: '《复仇者联盟》',
-          time: '2小时前',
-          type: 'upload'
-        },
-        {
-          title: '收藏了电影',
-          description: '《泰坦尼克号》',
-          time: '1天前',
-          type: 'favorite'
-        },
-        {
-          title: '观看了电影',
-          description: '《星际穿越》',
-          time: '3天前',
-          type: 'watch'
-        }
-      ]);
-
-    } catch (error) {
-      console.error('获取用户数据失败:', error);
-      message.error('获取用户数据失败');
-    }
-  }, [user]);
+  const { user } = useAuth();
+  const [stats, setStats] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      fetchProfileData();
-    }
-  }, [user, fetchProfileData]);
+    fetchUserStats();
+  }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
-  const getActivityIcon = (type) => {
-    switch (type) {
-      case 'upload':
-        return <UploadOutlined style={{ color: '#52c41a' }} />;
-      case 'favorite':
-        return <HeartOutlined style={{ color: '#ff4d4f' }} />;
-      case 'watch':
-        return <VideoCameraOutlined style={{ color: '#1890ff' }} />;
-      default:
-        return <UserOutlined />;
-    }
-  };
-
-  const getActivityColor = (type) => {
-    switch (type) {
-      case 'upload':
-        return 'green';
-      case 'favorite':
-        return 'red';
-      case 'watch':
-        return 'blue';
-      default:
-        return 'default';
+  const fetchUserStats = async () => {
+    try {
+      // 这里可以添加获取用户统计信息的API调用
+      // const response = await api.get('/api/v1/users/stats');
+      // setStats(response.data);
+      
+      // 模拟数据
+      setStats({
+        favoritesCount: 12,
+        uploadsCount: 5,
+        watchTime: 120, // 小时
+        joinDate: '2024-01-15'
+      });
+    } catch (error) {
+      console.error('获取用户统计失败:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!user) {
+  if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '100px', color: 'white' }}>
-        <Title level={3}>请先登录</Title>
-        <Button type="primary" onClick={() => navigate('/login')}>
-          去登录
-        </Button>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="loading-spinner mx-auto mb-4"></div>
+          <p className="text-white text-lg">加载用户信息中...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <ProfileContainer>
-      <ProfileHeader>
-        <div className="user-info">
-          <div className="avatar">
-            <UserOutlined />
+    <div className="page-container min-h-screen">
+      <div className="pt-24 pb-12">
+        <div className="content-wrapper">
+          {/* 页面标题 */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-white mb-4">
+              个人资料
+            </h1>
+            <p className="text-white/70 text-lg">
+              管理您的账户信息和偏好设置
+            </p>
           </div>
-          <div className="details">
-            <h2>{user.username}</h2>
-            <p>{user.email}</p>
-            <p>加入时间：{new Date().toLocaleDateString()}</p>
-            <div className="actions">
-              <Button icon={<EditOutlined />} size="large">
-                编辑资料
-              </Button>
-              <Button 
-                icon={<LogoutOutlined />} 
-                size="large" 
-                onClick={handleLogout}
-                danger
-              >
-                退出登录
-              </Button>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* 用户信息卡片 */}
+            <div className="md:col-span-1">
+              <div className="glass-card p-6 text-center">
+                <div className="w-24 h-24 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-3xl font-bold">
+                  {user?.username?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                
+                <h2 className="text-xl font-bold text-gray-800 mb-2">
+                  {user?.username || '未知用户'}
+                </h2>
+                
+                <p className="text-gray-600 mb-4">
+                  {user?.email || '未设置邮箱'}
+                </p>
+
+                <div className="space-y-2 text-sm text-gray-500">
+                  <div>
+                    <span className="font-medium">用户ID:</span> {user?.id}
+                  </div>
+                  <div>
+                    <span className="font-medium">注册时间:</span> {stats.joinDate || '未知'}
+                  </div>
+                  <div>
+                    <span className="font-medium">账户状态:</span> 
+                    <span className="ml-2 px-2 py-1 bg-green-100 text-green-600 rounded-full text-xs">
+                      活跃
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 统计信息和设置 */}
+            <div className="md:col-span-2 space-y-8">
+              {/* 用户统计 */}
+              <div className="glass-card p-6">
+                <h3 className="text-xl font-bold text-gray-800 mb-6">
+                  📊 观看统计
+                </h3>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-purple-600 mb-2">
+                      {stats.favoritesCount || 0}
+                    </div>
+                    <div className="text-gray-600 text-sm">收藏电影</div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-600 mb-2">
+                      {stats.uploadsCount || 0}
+                    </div>
+                    <div className="text-gray-600 text-sm">上传电影</div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-600 mb-2">
+                      {stats.watchTime || 0}
+                    </div>
+                    <div className="text-gray-600 text-sm">观看小时</div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-orange-600 mb-2">
+                      ★★★
+                    </div>
+                    <div className="text-gray-600 text-sm">平均评分</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 快捷操作 */}
+              <div className="glass-card p-6">
+                <h3 className="text-xl font-bold text-gray-800 mb-6">
+                  ⚡ 快捷操作
+                </h3>
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  <a 
+                    href="/favorites"
+                    className="block p-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:shadow-lg transition-all duration-200"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">♥</span>
+                      <div>
+                        <div className="font-semibold">我的收藏</div>
+                        <div className="text-sm opacity-90">查看收藏的电影</div>
+                      </div>
+                    </div>
+                  </a>
+
+                  <a 
+                    href="/upload"
+                    className="block p-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:shadow-lg transition-all duration-200"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">↑</span>
+                      <div>
+                        <div className="font-semibold">上传电影</div>
+                        <div className="text-sm opacity-90">分享您的影片</div>
+                      </div>
+                    </div>
+                  </a>
+
+                  <a 
+                    href="/search"
+                    className="block p-4 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg hover:shadow-lg transition-all duration-200"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">⚲</span>
+                      <div>
+                        <div className="font-semibold">浏览电影</div>
+                        <div className="text-sm opacity-90">发现更多精彩</div>
+                      </div>
+                    </div>
+                  </a>
+
+                  <button className="block p-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:shadow-lg transition-all duration-200">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">📝</span>
+                      <div>
+                        <div className="font-semibold">观看历史</div>
+                        <div className="text-sm opacity-90">查看播放记录</div>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* 账户设置 */}
+              <div className="glass-card p-6">
+                <h3 className="text-xl font-bold text-gray-800 mb-6">
+                  账户设置
+                </h3>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                    <div>
+                      <div className="font-medium text-gray-800">邮件通知</div>
+                      <div className="text-sm text-gray-600">接收电影推荐和更新</div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                    <div>
+                      <div className="font-medium text-gray-800">自动播放</div>
+                      <div className="text-sm text-gray-600">自动播放下一个视频</div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                    <div>
+                      <div className="font-medium text-gray-800">高清模式</div>
+                      <div className="text-sm text-gray-600">优先播放高清版本</div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* 危险操作 */}
+              <div className="glass-card p-6 border-2 border-red-200">
+                <h3 className="text-xl font-bold text-red-600 mb-4">
+                  ⚠️ 危险操作
+                </h3>
+                
+                <div className="space-y-4">
+                  <button className="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200">
+                    退出登录
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </ProfileHeader>
-
-      <Row gutter={[24, 24]}>
-        <Col xs={24} sm={8}>
-          <StatCard>
-            <Statistic
-              title="上传的电影"
-              value={stats.uploadedMovies}
-              prefix={<UploadOutlined />}
-            />
-          </StatCard>
-        </Col>
-        <Col xs={24} sm={8}>
-          <StatCard>
-            <Statistic
-              title="收藏的电影"
-              value={stats.favoriteMovies}
-              prefix={<HeartOutlined />}
-            />
-          </StatCard>
-        </Col>
-        <Col xs={24} sm={8}>
-          <StatCard>
-            <Statistic
-              title="总观看次数"
-              value={stats.totalViews}
-              prefix={<VideoCameraOutlined />}
-            />
-          </StatCard>
-        </Col>
-      </Row>
-
-      <ActivityCard
-        title={
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <VideoCameraOutlined />
-            最近活动
-          </div>
-        }
-      >
-        <List
-          itemLayout="horizontal"
-          dataSource={recentActivity}
-          renderItem={(item) => (
-            <List.Item>
-              <List.Item.Meta
-                avatar={getActivityIcon(item.type)}
-                title={
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    {item.title}
-                    <Tag color={getActivityColor(item.type)}>
-                      {item.type === 'upload' ? '上传' : 
-                       item.type === 'favorite' ? '收藏' : '观看'}
-                    </Tag>
-                  </div>
-                }
-                description={
-                  <div>
-                    {item.description}
-                    <Text style={{ marginLeft: '10px', opacity: 0.6 }}>
-                      {item.time}
-                    </Text>
-                  </div>
-                }
-              />
-            </List.Item>
-          )}
-        />
-      </ActivityCard>
-    </ProfileContainer>
+      </div>
+    </div>
   );
 };
 
