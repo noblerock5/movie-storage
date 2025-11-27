@@ -92,8 +92,8 @@ const Favorites = () => {
 
   const fetchFavorites = async () => {
     try {
-      const response = await api.get('/api/favorites');
-      setFavorites(response.data.movies || []);
+      const response = await api.get('/api/v1/favorites');
+      setFavorites(response.data || []);
     } catch (error) {
       console.error('获取收藏列表失败:', error);
       message.error('获取收藏列表失败');
@@ -104,7 +104,7 @@ const Favorites = () => {
 
   const removeFavorite = async (movieId) => {
     try {
-      await api.delete(`/api/favorites/${movieId}`);
+      await api.delete(`/api/v1/favorites/${movieId}`);
       message.success('已取消收藏');
       setFavorites(favorites.filter(movie => movie.id !== movieId));
     } catch (error) {

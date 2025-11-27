@@ -141,11 +141,11 @@ const Profile = () => {
     try {
       // 获取用户统计信息
       const [favoritesResponse, moviesResponse] = await Promise.all([
-        api.get('/api/favorites'),
-        api.get('/api/movies?page=1&limit=100')
+        api.get('/api/v1/favorites'),
+        api.get('/api/v1/movies?page=1&limit=100')
       ]);
 
-      const favoriteCount = favoritesResponse.data.movies?.length || 0;
+      const favoriteCount = favoritesResponse.data?.length || 0;
       const uploadedCount = moviesResponse.data.movies?.filter(m => m.user_id === user.id).length || 0;
 
       setStats({

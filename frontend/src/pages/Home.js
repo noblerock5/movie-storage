@@ -70,11 +70,11 @@ const Home = () => {
   const fetchMovies = async () => {
     try {
       // 获取热门电影
-      const trendingResponse = await api.get('/api/movies/search?q=2023&page=1');
-      setTrendingMovies(trendingResponse.data.results?.slice(0, 6) || []);
+      const trendingResponse = await api.get('/api/v1/movies/search?q=2023&page=1');
+      setTrendingMovies(trendingResponse.data.movies?.slice(0, 6) || []);
       
       // 获取最新上传的电影
-      const recentResponse = await api.get('/api/movies?page=1&limit=6');
+      const recentResponse = await api.get('/api/v1/movies?page=1&limit=6');
       setRecentMovies(recentResponse.data.movies || []);
     } catch (error) {
       console.error('获取电影列表失败:', error);

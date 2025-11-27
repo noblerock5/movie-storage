@@ -115,7 +115,7 @@ const UploadPage = () => {
     setUploadProgress(0);
 
     try {
-      const response = await api.post('/api/movies/upload', formData, {
+      const response = await api.post('/api/v1/movies/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

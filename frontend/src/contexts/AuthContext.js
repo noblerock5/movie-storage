@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (token) {
       // 验证token有效性
-      api.get('/auth/me').then(response => {
+      api.get('/api/v1/auth/me').then(response => {
         setUser(response.data);
       }).catch(() => {
         localStorage.removeItem('token');
@@ -34,12 +34,21 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await api.post('/auth/login', { email, password });
+      // 使用 FormData 格式发送登录请求（OAuth2PasswordRequestForm）
+      const formData = new FormData();
+      formData.append('username', email); // OAuth2 使用 username 字段
+      formData.append('password', password);
+      
+      const response = await api.post('/api/v1/auth/login', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
       const { access_token } = response.data;
       localStorage.setItem('token', access_token);
       
       // 获取用户信息
-      const userResponse = await api.get('/auth/me');
+      const userResponse = await api.get('/api/v1/auth/me');
       setUser(userResponse.data);
       
       message.success('登录成功');
@@ -52,12 +61,11 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await api.post('/auth/register', userData);
-      const { access_token } = response.data;
-      localStorage.setItem('token', access_token);
+      const response = await api.post('/api/v1/auth/register', userData);
+      localStorage.setItem('token', response.data.access_token);
       
       // 获取用户信息
-      const userResponse = await api.get('/auth/me');
+      const userResponse = await api.get('/api/v1/auth/me');
       setUser(userResponse.data);
       
       message.success('注册成功');

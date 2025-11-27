@@ -154,8 +154,8 @@ const MovieDetail = () => {
 
   const checkFavoriteStatus = useCallback(async () => {
     try {
-      const response = await api.get('/api/favorites');
-      const favorites = response.data.movies || [];
+      const response = await api.get('/api/v1/favorites');
+      const favorites = response.data || [];
       setIsFavorite(favorites.some(m => m.id === parseInt(id)));
     } catch (error) {
       console.error('检查收藏状态失败:', error);
@@ -164,7 +164,7 @@ const MovieDetail = () => {
 
   const fetchMovieDetail = useCallback(async () => {
     try {
-      const response = await api.get(`/api/movies/${id}`);
+      const response = await api.get(`/api/v1/movies/${id}`);
       setMovie(response.data);
       
       // 检查是否已收藏
@@ -196,10 +196,10 @@ const MovieDetail = () => {
 
     try {
       if (isFavorite) {
-        await api.delete(`/api/favorites/${id}`);
+        await api.delete(`/api/v1/favorites/${id}`);
         message.success('已取消收藏');
       } else {
-        await api.post(`/api/favorites/${id}`);
+        await api.post(`/api/v1/favorites/${id}`);
         message.success('收藏成功');
       }
       setIsFavorite(!isFavorite);
@@ -216,7 +216,7 @@ const MovieDetail = () => {
 
   const handleCast = async () => {
     try {
-      const response = await api.get(`/api/cast/${id}`);
+      const response = await api.get(`/api/v1/cast/${id}`);
       setCastDevices(response.data.available_devices || []);
       setCastModalVisible(true);
     } catch (error) {
@@ -226,7 +226,7 @@ const MovieDetail = () => {
 
   const startCast = async (device) => {
     try {
-      const response = await api.post('/api/cast/start', {
+      const response = await api.post('/api/v1/cast/start', {
         movie_id: parseInt(id),
         device_ip: device.ip
       });

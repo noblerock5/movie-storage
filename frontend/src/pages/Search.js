@@ -129,11 +129,11 @@ const SearchPage = () => {
 
     setLoading(true);
     try {
-      const response = await api.get('/api/movies/search', {
+      const response = await api.get('/api/v1/movies/search', {
         params: { q: searchQuery, page }
       });
       
-      setSearchResults(response.data.results || []);
+      setSearchResults(response.data.movies || []);
       setTotalResults(response.data.total || 0);
       setCurrentPage(page);
     } catch (error) {
